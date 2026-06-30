@@ -18,9 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntity.class)
 public class MixinLivingEntity {
 
-    // this is the way to ENSURE that for every change in status effect, the old value is removed.
-    // I don't know if this is safe tho...
-
     @Inject(
             method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z",
             at = @At("HEAD")
@@ -38,9 +35,7 @@ public class MixinLivingEntity {
             StatusEffectAttribute.updateStatusEffectAttribute(effect.getEffect(), effect.getDuration(), effect.getAmplifier(), effect.isAmbient());
     }
 
-// using removeMobEffectInternal() instead of removeMobEffect() because the former worked and the latter didn't, I don't know why.
-    // remove status effect from the player status effect list. Reason is just to delete unused effect from the map.
-    @Inject(method = "removeEffectNoUpdate", at = @At("RETURN"))
+    @Inject(method = "removeEffect", at = @At("RETURN"))
     private void onMobEffectRemoved(Holder<MobEffect> effect, CallbackInfoReturnable<MobEffectInstance> cir) {
         StatusEffectAttribute.removeStatusEffectAttribute(effect);
     }

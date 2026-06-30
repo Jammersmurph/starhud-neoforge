@@ -1,0 +1,29 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+
+license="MIT"
+
+[[mods]]
+modId="starhud"
+version="${file.jarVersion}"
+displayName="StarHUD"
+logoFile="assets/starhud/icon.png"
+credits="Finside"
+authors="Finside"
+description='''
+a mod that provides fancy and fresh HUDs
+'''
+
+[[dependencies.starhud]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.21.1]"
+    ordering="NONE"
+    side="CLIENT"
+
+[[dependencies.starhud]]
+    modId="cloth_config"
+    mandatory=true
+    versionRange="[15.0.0,16.0.0)"
+    ordering="NONE"
+    side="CLIENT"

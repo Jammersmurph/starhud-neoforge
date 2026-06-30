@@ -1,22 +1,17 @@
 package fin.starhud;
 
 import fin.starhud.config.GeneralSettings;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
-
 
 public class Helper {
 
     private static final Minecraft CLIENT = Minecraft.getInstance();
     private static final GeneralSettings.HUDSettings HUD_SETTINGS = Main.settings.generalSettings.hudSettings;
 
-    private static final char[] superscripts = "⁰¹²³⁴⁵⁶⁷⁸⁹".toCharArray();
-    private static final char[] subscripts = "₀₁₂₃₄₅₆₇₈₉".toCharArray();
+    private static final char[] superscripts = "\u2070\u00B9\u00B2\u00B3\u2074\u2075\u2076\u2077\u2078\u2079".toCharArray();
+    private static final char[] subscripts = "\u2080\u2081\u2082\u2083\u2084\u2085\u2086\u2087\u2088\u2089".toCharArray();
 
-    // only convert numbers.
     public static String toSuperscript(String str) {
         char[] chars = str.toCharArray();
 
@@ -45,10 +40,7 @@ public class Helper {
         return new String(chars);
     }
 
-    // convert (modname:snake_case) into (Snake Case)
     public static String idNameFormatter(String id) {
-
-        // trim every character from ':' until first index
         id = id.substring(id.indexOf(':') + 1);
 
         char[] chars = id.toCharArray();
@@ -61,7 +53,6 @@ public class Helper {
 
             chars[i] = ' ';
 
-            // capitalize the first character after spaces
             if (i + 1 < chars.length) {
                 chars[i + 1] = Character.toUpperCase(chars[i + 1]);
             }
@@ -77,14 +68,13 @@ public class Helper {
         return left <= u && u <= right;
     }
 
-    // color transition from pastel (red to green).
     public static int getItemBarColor(int stackStep, int maxStep) {
         return Mth.hsvToRgb(0.35F * stackStep / (float) maxStep, 0.45F, 0.95F);
     }
 
     public static float getGlobalScale() {
         if (HUD_SETTINGS.getGlobalScale() == 0) {
-            return CLIENT.getWindow().getGuiScale();
+            return (float) CLIENT.getWindow().getGuiScale();
         }
         return HUD_SETTINGS.getGlobalScale();
     }
@@ -106,7 +96,6 @@ public class Helper {
 
         String period = hours >= 12 ? " PM" : " AM";
 
-        // 01.00 until 12.59 AM / PM
         hours %= 12;
         if (hours == 0) hours = 12;
 
@@ -115,13 +104,12 @@ public class Helper {
         return timeBuilder.toString();
     }
 
-    public static String getModName(Identifier id) {
-        String nameSpace = id.getNamespace();
-        ModContainer container = FabricLoader.getInstance().getModContainer(nameSpace).orElse(null);
-        return container == null ? nameSpace : container.getMetadata().getName();
+    public static String getModName(net.minecraft.resources.ResourceLocation id) {
+        return id.getNamespace();
     }
 
-    public static int getStep(int curr, int max, int maxStep) {
-        return Math.clamp(Math.round((float) curr * maxStep / (float) max), 0, maxStep);
+    public static int getStep(int value, int maxValue, int segments) {
+        if (maxValue <= 0 || value <= 0) return 0;
+        return Math.min(segments, (int) ((double) value / maxValue * segments));
     }
 }

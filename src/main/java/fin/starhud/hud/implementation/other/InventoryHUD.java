@@ -7,8 +7,8 @@ import fin.starhud.helper.RenderUtils;
 import fin.starhud.hud.AbstractHUD;
 import fin.starhud.hud.HUDId;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -17,8 +17,8 @@ public class InventoryHUD extends AbstractHUD {
     private static final InventorySettings INVENTORY_SETTINGS = Main.settings.inventorySettings;
     private static final GeneralSettings.HUDSettings HUD_SETTINGS = Main.settings.generalSettings.hudSettings;
 
-    private static final Identifier INVENTORY_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/inventory.png");
-    private static final Identifier INVENTORY_TEXTURE_VERTICAL = Identifier.fromNamespaceAndPath("starhud", "hud/inventory_vertical.png");
+    private static final ResourceLocation INVENTORY_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/inventory.png");
+    private static final ResourceLocation INVENTORY_TEXTURE_VERTICAL = ResourceLocation.fromNamespaceAndPath("starhud", "hud/inventory_vertical.png");
 
     private static final int[] SLOT_X_HORIZONTAL = new int[27];
     private static final int[] SLOT_Y_HORIZONTAL = new int[27];
@@ -81,7 +81,7 @@ public class InventoryHUD extends AbstractHUD {
     }
 
     @Override
-    public boolean renderHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
         if (drawVertical) {
             return drawInventoryVertical(context, x, y, drawBackground);
         } else {
@@ -97,7 +97,7 @@ public class InventoryHUD extends AbstractHUD {
         preComputeVertical();
     }
 
-    private boolean drawInventoryVertical(GuiGraphicsExtractor context, int x, int y, boolean drawBackground) {
+    private boolean drawInventoryVertical(GuiGraphics context, int x, int y, boolean drawBackground) {
         Inventory inventory = CLIENT.player.getInventory();
 
         int w = getWidth();
@@ -114,22 +114,22 @@ public class InventoryHUD extends AbstractHUD {
 
         for (int itemIndex = 0; itemIndex < 27; ++itemIndex) {
 
-            ItemStack stack = inventory.getNonEquipmentItems().get(itemIndex + 9);
+            ItemStack stack = inventory.items.get(itemIndex + 9);
 
             if (!stack.isEmpty()) {
 
                 int x1 = x + SLOT_X_VERTICAL[itemIndex];
                 int y1 = y + SLOT_Y_VERTICAL[itemIndex];
 
-                context.item(stack, x1, y1);
-                context.itemDecorations(CLIENT.font, stack, x1, y1);
+                context.renderItem(stack, x1, y1);
+                context.renderItemDecorations(CLIENT.font, stack, x1, y1);
             }
         }
 
         return true;
     }
 
-    private boolean drawInventoryHorizontal(GuiGraphicsExtractor context, int x, int y, boolean drawBackground) {
+    private boolean drawInventoryHorizontal(GuiGraphics context, int x, int y, boolean drawBackground) {
         Inventory inventory = CLIENT.player.getInventory();
 
         int w = getWidth();
@@ -147,14 +147,14 @@ public class InventoryHUD extends AbstractHUD {
 
         for (int itemIndex = 0; itemIndex < 27; ++itemIndex) {
 
-            ItemStack stack = inventory.getNonEquipmentItems().get(itemIndex + 9);
+            ItemStack stack = inventory.items.get(itemIndex + 9);
 
             if (!stack.isEmpty()) {
                 int x1 = x + SLOT_X_HORIZONTAL[itemIndex];
                 int y1 = y + SLOT_Y_HORIZONTAL[itemIndex];
 
-                context.item(stack, x1, y1);
-                context.itemDecorations(CLIENT.font, stack, x1, y1);
+                context.renderItem(stack, x1, y1);
+                context.renderItemDecorations(CLIENT.font, stack, x1, y1);
             }
         }
 
@@ -164,7 +164,7 @@ public class InventoryHUD extends AbstractHUD {
     public boolean hasItemInInventory() {
         Inventory inventory = CLIENT.player.getInventory();
         for (int itemIndex = 0; itemIndex < 27; ++itemIndex) {
-            ItemStack stack = inventory.getNonEquipmentItems().get(itemIndex + 9);
+            ItemStack stack = inventory.items.get(itemIndex + 9);
             if (!stack.isEmpty()) {
                 return true;
             }

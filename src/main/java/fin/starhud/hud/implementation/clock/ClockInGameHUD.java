@@ -8,15 +8,15 @@ import fin.starhud.helper.RenderUtils;
 import fin.starhud.hud.AbstractHUD;
 import fin.starhud.hud.HUDId;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
 public class ClockInGameHUD extends AbstractHUD {
 
     private static final ClockInGameSettings CLOCK_IN_GAME_SETTINGS = Main.settings.clockSettings.inGameSetting;
 
-    private static final Identifier CLOCK_IN_GAME_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/clock_ingame.png");
+    private static final ResourceLocation CLOCK_IN_GAME_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/clock_ingame.png");
 
     private static final int TEXTURE_WIDTH = 13;
     private static final int TEXTURE_HEIGHT = 13 * 4;
@@ -56,7 +56,7 @@ public class ClockInGameHUD extends AbstractHUD {
 
         if (world == null) return false;
 
-        long time = world.getDefaultClockTime() % 24000;
+        long time = world.getDayTime() % 24000;
 
         boolean use12Hour = CLOCK_IN_GAME_SETTINGS.use12Hour;
         displayMode = getSettings().getDisplayMode();
@@ -85,7 +85,7 @@ public class ClockInGameHUD extends AbstractHUD {
     }
 
     @Override
-    public boolean renderHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
 
         int w = getWidth();
         int h = getHeight();
@@ -119,7 +119,7 @@ public class ClockInGameHUD extends AbstractHUD {
     private static int getWeatherOrTime(ClientLevel clientLevel) {
         if (clientLevel.isThundering()) return 3;
         else if (clientLevel.isRaining()) return 2;
-        else if (clientLevel.isDarkOutside()) return 1;
+        else if (clientLevel.getSkyDarken(1.0f) > 0.25f) return 1;
         else return 0;
     }
 

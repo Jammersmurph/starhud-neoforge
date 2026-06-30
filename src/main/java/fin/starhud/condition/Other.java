@@ -1,6 +1,6 @@
 package fin.starhud.condition;
 
-import net.fabricmc.loader.api.FabricLoader;
+import net.neoforged.fml.ModList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.world.level.Level;
@@ -12,7 +12,7 @@ public class Other {
     public static boolean isModLoaded(String arg) {
         if (arg == null || arg.isEmpty()) return false;
 
-        return FabricLoader.getInstance().isModLoaded(arg);
+        return net.neoforged.fml.ModList.get().isLoaded(arg);
     }
 
     public static boolean isInSingleplayer(String ignored) {

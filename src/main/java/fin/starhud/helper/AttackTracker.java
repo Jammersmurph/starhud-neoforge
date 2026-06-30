@@ -1,13 +1,8 @@
 package fin.starhud.helper;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.phys.HitResult;
 
 import java.util.UUID;
 
@@ -17,7 +12,7 @@ public class AttackTracker {
     private static long combo = -1;
 
     private static UUID entityUuid;
-    private static long lastHitTime = -1; // ticks
+    private static long lastHitTime = -1;
     private static int lastHurtTime = 0;
 
     public static double getReach() {
@@ -32,6 +27,12 @@ public class AttackTracker {
         if (client.level == null) return;
         if (client.player == null) return;
 
+        if (client.hitResult instanceof EntityHitResult ehr) {
+            if (client.options.keyAttack.consumeClick()) {
+                handleAttack(client.player, ehr);
+            }
+        }
+
         int currentHurtTime = client.player.hurtTime;
         if (currentHurtTime > 0 && lastHurtTime == 0) {
             if (combo != -1)
@@ -39,8 +40,8 @@ public class AttackTracker {
         }
         lastHurtTime = currentHurtTime;
 
-        long now = client.level.getGameTime(); // ticks
-        if (lastHitTime != -1 && now - lastHitTime >= 4 * 20) { // 4 seconds
+        long now = client.level.getGameTime();
+        if (lastHitTime != -1 && now - lastHitTime >= 4 * 20) {
             combo = -1;
             reach = -1;
             lastHitTime = now;
@@ -48,23 +49,16 @@ public class AttackTracker {
         }
     }
 
-    public static InteractionResult onAttack(Player player, Level world, InteractionHand hand, Entity entity, EntityHitResult hitResult) {
-        if (!world.isClientSide()) return InteractionResult.PASS;
-
-        long now = world.getGameTime(); // ticks
+    private static void handleAttack(net.minecraft.world.entity.player.Player player, EntityHitResult hitResult) {
+        Entity entity = hitResult.getEntity();
+        long now = player.level().getGameTime();
 
         boolean sameTarget = entity.getUUID().equals(entityUuid);
         boolean cooldownExpired = now - lastHitTime >= 10;
 
-        if (sameTarget && !cooldownExpired) return InteractionResult.PASS;
+        if (sameTarget && !cooldownExpired) return;
 
-        HitResult target = Minecraft.getInstance().hitResult;
-
-        if (target instanceof EntityHitResult ehr) {
-            reach = player.getEyePosition().distanceTo(ehr.getLocation());
-        } else {
-            reach = player.getEyePosition().distanceTo(entity.getEyePosition());
-        }
+        reach = player.getEyePosition().distanceTo(hitResult.getLocation());
 
         if (sameTarget) {
             ++combo;
@@ -73,7 +67,5 @@ public class AttackTracker {
             entityUuid = entity.getUUID();
         }
         lastHitTime = now;
-
-        return InteractionResult.PASS;
     }
 }
