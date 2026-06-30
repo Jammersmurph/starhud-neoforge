@@ -1,16 +1,13 @@
 package fin.starhud.hud;
 
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 public interface HUDInterface {
 
-    boolean render(GuiGraphicsExtractor context);
-
-    boolean collect();
-
     boolean shouldRender();
-
     void update();
-
+    boolean render(GuiGraphics context);
+    boolean collect();
     String getId();
+    String getName();
 }

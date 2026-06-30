@@ -1,6 +1,7 @@
 package fin.starhud.hud;
 
 public enum HUDId {
+
     HELMET,
     CHESTPLATE,
     LEGGINGS,
@@ -9,7 +10,6 @@ public enum HUDId {
     X_COORDINATE,
     Y_COORDINATE,
     Z_COORDINATE,
-
     NETHER_X_COORDINATE,
     NETHER_Y_COORDINATE,
     NETHER_Z_COORDINATE,
@@ -20,20 +20,25 @@ public enum HUDId {
     CLOCK_INGAME,
     CLOCK_SYSTEM,
 
-    BIOME,
-    DAY,
-    DIRECTION,
     FPS,
     TPS,
     PING,
-    SPEED,
+    DIRECTION,
+    BIOME,
+    DAY,
+    PLAYER_COUNT,
     INVENTORY,
     INVENTORY_SPACE,
-    TARGETED_CROSSHAIR,
-    PLAYER_COUNT,
-    COMBO,
+    SPEED,
     REACH,
+    COMBO,
+    TARGETED_CROSSHAIR,
 
     POSITIVE_EFFECT,
-    NEGATIVE_EFFECT
+    NEGATIVE_EFFECT;
+
+    @Override
+    public String toString() {
+        return name().toLowerCase();
+    }
 }

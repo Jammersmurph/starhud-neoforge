@@ -16,18 +16,16 @@ import fin.starhud.screen.history.HUDAction;
 import fin.starhud.screen.history.HUDHistory;
 import fin.starhud.screen.history.ReversibleAction;
 import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.AutoConfigClient;
+
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.ConfirmScreen;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
+
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.ARGB;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
@@ -209,7 +207,7 @@ public class EditHUDScreen extends Screen {
                             isMoreOptionActivated = false;
                             selectedHUDs.clear();
 
-                            this.minecraft.setScreen(AutoConfigClient.getConfigScreen(Settings.class, this).get());
+                            this.minecraft.setScreen(AutoConfig.getConfigScreen(Settings.class, this).get());
                         }
                 )
                 .tooltip(Tooltip.create(Component.translatable("starhud.screen.tooltip.config")))
@@ -425,14 +423,14 @@ public class EditHUDScreen extends Screen {
         updateGroupFieldFromSelectedHUD();
     }
 
-    //public final void extractRenderStateWithTooltipAndSubtitles(final GuiGraphicsExtractor graphics, final int mouseX, final int mouseY, final float a)
+    //public final void extractRenderStateWithTooltipAndSubtitles(final GuiGraphics graphics, final int mouseX, final int mouseY, final float a)
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 
         if (SETTINGS.drawDarkBackground) {
             final float alpha = (float) SETTINGS.getDarkOpacity() / 100;
-            final int color = ARGB.as8BitChannel(alpha) << 24;
+            final int color = ((int)(alpha * 255.0F)) << 24;
             context.fill(0, 0, this.width, this.height, color);
         }
 
@@ -446,7 +444,7 @@ public class EditHUDScreen extends Screen {
             snapResult.render(context);
         }
 
-        super.extractRenderState(context, mouseX, mouseY, delta);
+        super.render(context, mouseX, mouseY, delta);
 
         // draw help
         if (helpWidget.isActive()) {
@@ -462,12 +460,12 @@ public class EditHUDScreen extends Screen {
 
         // draw X and Y next to their textField.
         if (xField.isVisible() && yField.isVisible()) {
-            context.text(CLIENT.font, Component.translatable("starhud.screen.label.x"), xField.getX() - 5 - 2 - 3, xField.getY() + 6, 0xFFFFFFFF, true);
-            context.text(CLIENT.font, Component.translatable("starhud.screen.label.y"), yField.getX() - 5 - 2 - 3, yField.getY() + 6, 0xFFFFFFFF, true);
+            context.drawString(CLIENT.font, Component.translatable("starhud.screen.label.x"), xField.getX() - 5 - 2 - 3, xField.getY() + 6, 0xFFFFFFFF, true);
+            context.drawString(CLIENT.font, Component.translatable("starhud.screen.label.y"), yField.getX() - 5 - 2 - 3, yField.getY() + 6, 0xFFFFFFFF, true);
         }
 
         if (gapField.isVisible()) {
-            context.text(CLIENT.font, Component.translatable("starhud.screen.label.gap"), gapField.getX() - 20 - 3, gapField.getY() + 6, 0xFFFFFFFF, true);
+            context.drawString(CLIENT.font, Component.translatable("starhud.screen.label.gap"), gapField.getX() - 20 - 3, gapField.getY() + 6, 0xFFFFFFFF, true);
         }
 
         if (dragSelection && hasMovedSincePress) {
@@ -487,7 +485,7 @@ public class EditHUDScreen extends Screen {
         }
     }
 
-    public void renderGrid(GuiGraphicsExtractor context) {
+    public void renderGrid(GuiGraphics context) {
 
         final Window WINDOW = this.minecraft.getWindow();
         final int screenWidth = WINDOW.getWidth();
@@ -502,13 +500,13 @@ public class EditHUDScreen extends Screen {
 
         if (snapPadding > 0)
             RenderUtils.drawBorder(context, snapPadding, snapPadding, screenWidth - (snapPadding * 2), screenHeight - (snapPadding * 2), color);
-        context.horizontalLine((snapPadding + 1), screenWidth - (snapPadding + 2), CENTER_Y, color);
-        context.verticalLine(CENTER_X, (snapPadding), screenHeight - (snapPadding + 1), color);
+        context.hLine((snapPadding + 1), screenWidth - (snapPadding + 2), CENTER_Y, color);
+        context.vLine(CENTER_X, (snapPadding), screenHeight - (snapPadding + 1), color);
 
         PixelPlacement.end(context);
     }
 
-    private void renderSelectedHUDBox(GuiGraphicsExtractor context) {
+    private void renderSelectedHUDBox(GuiGraphics context) {
         int x = selectedHUDBox.getX();
         int y = selectedHUDBox.getY();
         int w = selectedHUDBox.getWidth();
@@ -523,9 +521,9 @@ public class EditHUDScreen extends Screen {
         PixelPlacement.end(context);
     }
 
-    private void renderDragBox(GuiGraphicsExtractor context) {
+    private void renderDragBox(GuiGraphics context) {
 
-        float guiScale = this.minecraft.getWindow().getGuiScale();
+        double guiScale = this.minecraft.getWindow().getGuiScale();
 
         int x1 = (int) (Math.min(dragStartX, dragCurrentX) * guiScale);
         int y1 = (int) (Math.min(dragStartY, dragCurrentY) * guiScale);
@@ -548,7 +546,7 @@ public class EditHUDScreen extends Screen {
         }
     }
 
-    private void renderBoundingBoxes(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+    private void renderBoundingBoxes(GuiGraphics context, int mouseX, int mouseY) {
 
         PixelPlacement.start(context);
         for (AbstractHUD hud : HUDComponent.getInstance().getRenderedHUDs()) {
@@ -562,7 +560,7 @@ public class EditHUDScreen extends Screen {
         PixelPlacement.end(context);
     }
 
-    private void renderSelectedBox(GuiGraphicsExtractor context, AbstractHUD hud) {
+    private void renderSelectedBox(GuiGraphics context, AbstractHUD hud) {
         int x = hud.getX();
         int y = hud.getY();
         int width = hud.getTrueWidth();
@@ -576,7 +574,7 @@ public class EditHUDScreen extends Screen {
         }
     }
 
-    private void renderBoundingBox(GuiGraphicsExtractor context, AbstractHUD hud, int mouseX, int mouseY) {
+    private void renderBoundingBox(GuiGraphics context, AbstractHUD hud, int mouseX, int mouseY) {
         int x = hud.getX();
         int y = hud.getY();
         int width = hud.getTrueWidth();
@@ -600,19 +598,19 @@ public class EditHUDScreen extends Screen {
     private AbstractHUD clickedHUD = null;
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
-        if (super.mouseClicked(click, doubled))
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button))
             return true;
 
-        if (click.button() == 0) {
+        if (button == 0) {
             hasMovedSincePress = false;
-            dragStartX = click.x();
-            dragStartY = click.y();
-            dragCurrentX = click.x();
-            dragCurrentY = click.y();
+            dragStartX = mouseX;
+            dragStartY = mouseY;
+            dragCurrentX = mouseX;
+            dragCurrentY = mouseY;
 
             // find which HUD was clicked (if any)
-            clickedHUD = getHUDAtPosition(click.x(), click.y());
+            clickedHUD = getHUDAtPosition(mouseX, mouseY);
 
             if (clickedHUD != null) {
                 handleHUDClick(clickedHUD);
@@ -657,14 +655,14 @@ public class EditHUDScreen extends Screen {
 
     private boolean pendingChildClick;
     private void handleHUDClick(AbstractHUD clickedHUD) {
-        if (CLIENT.hasShiftDown()) {
+        if (hasShiftDown()) {
             // shift click: Add to selection (don't remove if already selected)
             if (!selectedHUDs.contains(clickedHUD)) {
                 selectedHUDs.add(clickedHUD);
             }
             // if already selected, we'll handle potential removal in mouseReleased
             pendingToggleHUD = selectedHUDs.contains(clickedHUD) ? clickedHUD : null;
-        } else if (CLIENT.hasControlDown()) {
+        } else if (hasControlDown()) {
             // ctrl click: toggle selection
             if (selectedHUDs.contains(clickedHUD)) {
                 pendingToggleHUD = clickedHUD; // remove on release if no drag
@@ -700,7 +698,7 @@ public class EditHUDScreen extends Screen {
     }
 
     private void handleEmptySpaceClick() {
-        if (!CLIENT.hasShiftDown() && !CLIENT.hasControlDown()) {
+        if (!hasShiftDown() && !hasControlDown()) {
             // click on empty space - clear selection
             selectedHUDs.clear();
             
@@ -716,12 +714,12 @@ public class EditHUDScreen extends Screen {
     public AbstractHUD pendingToggleHUD = null;
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent click) {
-        if (click.button() == 0) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0) {
             if (!hasMovedSincePress) {
                 // if mouse hasn't moved since clicked to release, we handle non mouse moved operation
                 dragging = false;
-                handleClickRelease(click.x(), click.y());
+                handleClickRelease(mouseX, mouseY);
             }
 
             // Finalize any drag operations
@@ -741,16 +739,16 @@ public class EditHUDScreen extends Screen {
             resetMouseState();
             return true;
         }
-        return super.mouseReleased(click);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     private void handleClickRelease(double mouseX, double mouseY) {
         // Handle pending toggle operations (for ctrl click and shift click)
         if (pendingToggleHUD != null) {
-            if (CLIENT.hasShiftDown()) {
+            if (hasShiftDown()) {
                 // shift click on already selected: remove from selection
                 selectedHUDs.remove(pendingToggleHUD);
-            } else if (CLIENT.hasControlDown()) {
+            } else if (hasControlDown()) {
                 // ctrl click toggle: remove from selection
                 selectedHUDs.remove(pendingToggleHUD);
             }
@@ -760,7 +758,7 @@ public class EditHUDScreen extends Screen {
         }
 
         // Handle single-click deselection for multi-selection
-        if (clickedHUD != null && !CLIENT.hasShiftDown() && !CLIENT.hasControlDown()) {
+        if (clickedHUD != null && !hasShiftDown() && !hasControlDown()) {
             if (pendingChildClick && clickedHUD instanceof GroupedHUD group) {
                 AbstractHUD hoveredChild = null;
 
@@ -800,34 +798,34 @@ public class EditHUDScreen extends Screen {
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
-        if (click.button() != 0) {
-            return super.mouseDragged(click, deltaX, deltaY);
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (button != 0) {
+            return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
         }
 
         // check if we've moved enough to start drag operation
         if (!hasMovedSincePress) {
-            int totalMovement = (int) (Math.abs(click.x() - dragStartX) + Math.abs(click.y() - dragStartY));
+            int totalMovement = (int) (Math.abs(mouseX - dragStartX) + Math.abs(mouseY - dragStartY));
             if (totalMovement >= DRAG_THRESHOLD) {
                 hasMovedSincePress = true;
-                startDragOperation(click.x(), click.y());
+                startDragOperation(mouseX, mouseY);
             }
         }
 
         if (hasMovedSincePress) {
-            dragCurrentX = click.x();
-            dragCurrentY = click.y();
+            dragCurrentX = mouseX;
+            dragCurrentY = mouseY;
 
             if (dragging && !selectedHUDs.isEmpty() && !selectedHUDs.getFirst().isInGroup()) { // if we've moved and there are selected huds, we drag them, obviously
-                dragSelectedHUDs(click.x(), click.y(), deltaX, deltaY);
+                dragSelectedHUDs(mouseX, mouseY, dragX, dragY);
                 return true;
             } else if (dragSelection) { // otherwise it's just drag box
-                updateDragBoxSelection(click.x(), click.y());
+                updateDragBoxSelection(mouseX, mouseY);
                 return true;
             }
         }
 
-        return super.mouseDragged(click, deltaX, deltaY);
+        return super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
     }
 
     private void startDragOperation(double mouseX, double mouseY) {
@@ -855,7 +853,7 @@ public class EditHUDScreen extends Screen {
 
             // if we clicked on a HUD, but it wasn't selected, and no modifiers,
             // clear selection first
-            if (clickedHUD != null && !CLIENT.hasShiftDown() && !CLIENT.hasControlDown()) {
+            if (clickedHUD != null && !hasShiftDown() && !hasControlDown()) {
                 selectedHUDs.clear();
                 initialDragBoxSelection.clear();
             }
@@ -914,7 +912,7 @@ public class EditHUDScreen extends Screen {
     private void dragSelectedHUDs(double mouseX, double mouseY, double deltaX, double deltaY) {
         if (selectedHUDs.isEmpty()) return;
 
-        final float guiScale = this.minecraft.getWindow().getGuiScale();
+        final double guiScale = this.minecraft.getWindow().getGuiScale();
 
         final int totalDeltaX = (int) ((dragCurrentX - dragStartX) * guiScale);
         final int totalDeltaY = (int) ((dragCurrentY - dragStartY) * guiScale);
@@ -1075,7 +1073,7 @@ public class EditHUDScreen extends Screen {
         }
 
         // Apply drag box selection based on modifier keys
-        if (CLIENT.hasShiftDown()) {
+        if (hasShiftDown()) {
             // shift drag box: Add new items to existing selection
             for (AbstractHUD hud : boxSelectedHUDs) {
                 if (!selectedHUDs.contains(hud)) { // only add if not already selected
@@ -1083,7 +1081,7 @@ public class EditHUDScreen extends Screen {
                     changed = true;
                 }
             }
-        } else if (CLIENT.hasControlDown()) {
+        } else if (hasControlDown()) {
 
             // ctrl drag box: invert items in box
             for (AbstractHUD hud : boxSelectedHUDs) {
@@ -1124,9 +1122,9 @@ public class EditHUDScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(KeyEvent input) {
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (isTextFieldsFocused())
-            return super.keyPressed(input);
+            return super.keyPressed(keyCode, scanCode, modifiers);
 
         if (!dragSelection && !dragging) {
 
@@ -1136,7 +1134,7 @@ public class EditHUDScreen extends Screen {
 
             if (!selectedHUDs.isEmpty()) {
                 for (AbstractHUD hud : selectedHUDs) {
-                    HUDAction act = onKeyPressed(hud, input.key(), input.modifiers());
+                    HUDAction act = onKeyPressed(hud, keyCode, modifiers);
                     if (act == null) break;
                     acts.add(act);
                 }
@@ -1149,7 +1147,7 @@ public class EditHUDScreen extends Screen {
                 return true;
             }
 
-            switch (input.key()) {
+            switch (keyCode) {
                 case GLFW.GLFW_KEY_G -> {
                     if (selectedHUDs.isEmpty()) break;
                     if (selectedHUDs.size() > 1) {
@@ -1170,7 +1168,7 @@ public class EditHUDScreen extends Screen {
                 }
 
                 case GLFW.GLFW_KEY_C -> {
-                    if (input.hasShiftDown()) {
+                    if (hasShiftDown()) {
                         int clampCount = HUDComponent.getInstance().clampAll();
                         if (clampCount > 0)
                             actionBar.setText(Component.translatable("starhud.screen.action.clamp_all_found", clampCount));
@@ -1181,7 +1179,7 @@ public class EditHUDScreen extends Screen {
                 }
 
                 case GLFW.GLFW_KEY_Z -> {
-                    if (input.hasControlDown() && history.canUndo()) {
+                    if (hasControlDown() && history.canUndo()) {
                         history.undo();
                         selectedHUDs.clear();
                         handled = true;
@@ -1189,7 +1187,7 @@ public class EditHUDScreen extends Screen {
                 }
 
                 case GLFW.GLFW_KEY_Y -> {
-                    if (input.hasControlDown() && history.canRedo()) {
+                    if (hasControlDown() && history.canRedo()) {
                         history.redo();
                         selectedHUDs.clear();
                         handled = true;
@@ -1197,14 +1195,14 @@ public class EditHUDScreen extends Screen {
                 }
 
                 case GLFW.GLFW_KEY_S -> {
-                    if (input.hasControlDown()) {
+                    if (hasControlDown()) {
                         saveCurrentState();
                         actionBar.setText(Component.translatable("starhud.screen.action.save"));
                     }
                 }
 
                 case GLFW.GLFW_KEY_R -> {
-                    if (input.hasControlDown() && input.hasShiftDown()) {
+                    if (hasControlDown() && hasShiftDown()) {
                         this.minecraft.setScreen(new ConfirmScreen(
                                 result -> {
                                     if (result) {
@@ -1228,7 +1226,7 @@ public class EditHUDScreen extends Screen {
             }
         }
 
-        return super.keyPressed(input);
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     public HUDAction onKeyPressed(AbstractHUD hud, int keyCode, int modifiers) {

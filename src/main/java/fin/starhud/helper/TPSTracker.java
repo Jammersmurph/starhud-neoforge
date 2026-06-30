@@ -24,9 +24,6 @@ public class TPSTracker {
         return mspt;
     }
 
-    // this update implementation is based on @maurohon MiniHUD tps update implementation
-    // see: https://github.com/maruohon/minihud/blob/5d2449886e26fba45646ea89f5a80f706d196e11/src/main/java/minihud/data/TpsDataManager.java#L70
-
     public static void onLevelTimeUpdate(long totalLevelTime) {
 
         if (totalLevelTime == lastLevelTime) {
@@ -39,24 +36,17 @@ public class TPSTracker {
             return;
         }
 
-        // grab the tick by getting the lastUpdated with the new one, and divide it with the elapsedTick for more precision.
-
         long currTickTime = System.currentTimeMillis();
         long elapsedTicks = totalLevelTime - lastLevelTime;
 
-        // this doesn't give the server's actual mspt, this only gives the total time after the time is getting updated, which is updated every 20 ticks usually, and not the time it takes for the server to process one tick.
         mspt = (double) (currTickTime - lastTickTime) / elapsedTicks;
 
         lastTickTime = currTickTime;
         lastLevelTime = totalLevelTime;
 
-        // add mspt to sample
-
         tickTimes[tickIndex] = mspt;
         tickIndex = (tickIndex + 1) % SAMPLE_SIZE;
         if (validSamples < SAMPLE_SIZE) validSamples++;
-
-        // tps calculation by getting the samples average.
 
         double total = 0;
         for (int i = 0; i < validSamples; i++) {

@@ -10,12 +10,11 @@ import fin.starhud.helper.RenderUtils;
 import fin.starhud.helper.StatusEffectAttribute;
 import fin.starhud.hud.AbstractHUD;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -31,12 +30,12 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
     private static final GeneralSettings.HUDSettings HUD_SETTINGS = Main.settings.generalSettings.hudSettings;
     private static final Settings.Effect SETTINGS = Main.settings.effectSettings;
 
-    private static final Identifier STATUS_EFFECT_BAR_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/effect_bar.png");
-    private static final Identifier STATUS_EFFECT_BAR_BACKGROUND_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/effect_bar_background.png");
+    private static final ResourceLocation STATUS_EFFECT_BAR_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/effect_bar.png");
+    private static final ResourceLocation STATUS_EFFECT_BAR_BACKGROUND_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/effect_bar_background.png");
 
-    private static final Identifier STATUS_EFFECT_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/effect.png");
-    private static final Identifier STATUS_EFFECT_AMBIENT_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/effect_ambient.png");
-    private static final Identifier STATUS_EFFECT_AMBIENT_COMBINED_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/effect_ambient_combined.png");
+    private static final ResourceLocation STATUS_EFFECT_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/effect.png");
+    private static final ResourceLocation STATUS_EFFECT_AMBIENT_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/effect_ambient.png");
+    private static final ResourceLocation STATUS_EFFECT_AMBIENT_COMBINED_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/effect_ambient_combined.png");
 
     private static final int ICON_WIDTH = 24;
     private static final int ICON_HEIGHT = 24;
@@ -49,7 +48,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
     private static final int STATUS_EFFECT_BAR_TEXTURE_WIDTH = 21;
     private static final int STATUS_EFFECT_BAR_TEXTURE_HEIGHT = 3;
 
-    private static final Map<Holder<MobEffect>, Identifier> STATUS_EFFECT_TEXTURE_MAP = new HashMap<>();
+    private static final Map<Holder<MobEffect>, ResourceLocation> STATUS_EFFECT_TEXTURE_MAP = new HashMap<>();
 
     private final EffectSettings effectSettings;
     public int size;
@@ -63,7 +62,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
     private HUDDisplayMode displayMode;
 
     private final List<String> effectDurationStrings = new ArrayList<>();
-    private final List<Identifier> effectTextures = new ArrayList<>();
+    private final List<ResourceLocation> effectTextures = new ArrayList<>();
     private final List<Integer> effectWidths = new ArrayList<>();
     private final List<Integer> effectColors = new ArrayList<>();
     private final List<Float> effectAlphas = new ArrayList<>();
@@ -119,7 +118,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
 
                 StatusEffectAttribute statusEffectAttribute = StatusEffectAttribute.getStatusEffectAttribute(instance);
 
-                Identifier effectTexture = getMobEffectTexture(instance.getEffect());
+                ResourceLocation effectTexture = getMobEffectTexture(instance.getEffect());
 
                 boolean ambient = instance.isAmbient();
 
@@ -168,7 +167,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
                 StatusEffectAttribute statusEffectAttribute = StatusEffectAttribute.getStatusEffectAttribute(instance);
                 int duration = instance.getDuration();
                 String effectTimeStr = buildEffectDurationString(duration);
-                Identifier effectTexture = getMobEffectTexture(instance.getEffect());
+                ResourceLocation effectTexture = getMobEffectTexture(instance.getEffect());
                 int effectWidth = CLIENT.font.width(effectTimeStr) - 1;
                 int totalInstanceWidth = displayMode.calculateWidth(13, effectWidth);
 
@@ -200,7 +199,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
     }
 
     @Override
-    public boolean renderHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
         if (CLIENT.player == null) return false;
         if (size == 0) return false;
 
@@ -215,7 +214,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
             return renderBarHUD(context, x, y, drawBackground);
     }
 
-    public boolean renderBarHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground) {
+    public boolean renderBarHUD(GuiGraphics context, int x, int y, boolean drawBackground) {
 
         for (int i = 0 ; i < size; ++i) {
 
@@ -241,7 +240,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
         return true;
     }
 
-    public boolean renderTimerHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderTimerHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
 
         for (int i = 0; i < size; ++i) {
             drawMobEffectTimerHUD(
@@ -251,7 +250,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
                     effectDurationStrings.get(i),
                     effectWidths.get(i), 13,
                     effectColors.get(i),
-                    ARGB.white(effectAlphas.get(i)),
+                    0x00FFFFFF | ((int)(effectAlphas.get(i) * 255.0F) << 24),
                     drawBackground,
                     drawTextShadow
             );
@@ -266,7 +265,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
         return true;
     }
 
-    public boolean drawMobEffectBarHUD(GuiGraphicsExtractor context, int x, int y, Identifier effectTexture, int color, float alpha, int step, String amplifier, boolean isAmbient, boolean drawBackground) {
+    public boolean drawMobEffectBarHUD(GuiGraphics context, int x, int y, ResourceLocation effectTexture, int color, float alpha, int step, String amplifier, boolean isAmbient, boolean drawBackground) {
         int gap = iconInfoGap;
 
         if (drawBackground) {
@@ -329,7 +328,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
                 0,0,
                 18, 18,
                 18,18,
-                ARGB.white(alpha)
+                0x00FFFFFF | ((int)(alpha * 255.0F) << 24)
         );
 
         if (amplifier.isEmpty()) return true;
@@ -345,7 +344,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
         return true;
     }
 
-    public void drawMobEffectTimerHUD(GuiGraphicsExtractor context, int x, int y, Identifier effectTexture, String timeStr, int width, int height, int textColor, int iconColor, boolean drawBackground, boolean drawTextShadow) {
+    public void drawMobEffectTimerHUD(GuiGraphics context, int x, int y, ResourceLocation effectTexture, String timeStr, int width, int height, int textColor, int iconColor, boolean drawBackground, boolean drawTextShadow) {
 
         // shrink the texture from 18x18 to 9x9.
         int from = 18;
@@ -368,7 +367,7 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
         );
     }
 
-    public static boolean drawSmallHUD(GuiGraphicsExtractor context, String infoText, int x, int y, int width, int height, Identifier iconTexture, float u, float v, int textureWidth, int textureHeight, int iconWidth, int iconHeight, int color, int iconColor, HUDDisplayMode displayMode, boolean drawBackground, boolean drawTextShadow) {
+    public static boolean drawSmallHUD(GuiGraphics context, String infoText, int x, int y, int width, int height, ResourceLocation iconTexture, float u, float v, int textureWidth, int textureHeight, int iconWidth, int iconHeight, int color, int iconColor, HUDDisplayMode displayMode, boolean drawBackground, boolean drawTextShadow) {
         if (infoText == null || iconTexture == null || displayMode == null) return false;
 
         int padding = HUD_SETTINGS.textPadding;
@@ -486,12 +485,12 @@ public abstract class AbstractEffectHUD extends AbstractHUD {
         return l + ':' + r;
     }
 
-    public static Identifier getMobEffectTexture(Holder<MobEffect> effect) {
+    public static ResourceLocation getMobEffectTexture(Holder<MobEffect> effect) {
         return STATUS_EFFECT_TEXTURE_MAP.computeIfAbsent(
                 effect,
                 e -> e.unwrapKey()
-                        .map(ResourceKey::identifier)
-                        .map(id -> Identifier.fromNamespaceAndPath(id.getNamespace(), "textures/mob_effect/" + id.getPath() + ".png"))
+                        .map(ResourceKey::location)
+                        .map(id -> ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "textures/mob_effect/" + id.getPath() + ".png"))
                         .orElseGet(MissingTextureAtlasSprite::getLocation)
         );
     }

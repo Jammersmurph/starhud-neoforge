@@ -9,18 +9,18 @@ import fin.starhud.helper.RenderUtils;
 import fin.starhud.hud.AbstractHUD;
 import fin.starhud.hud.HUDId;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.allay.Allay;
-import net.minecraft.world.entity.animal.fish.WaterAnimal;
-import net.minecraft.world.entity.animal.golem.SnowGolem;
+import net.minecraft.world.entity.animal.WaterAnimal;
+import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -39,7 +39,7 @@ public class TargetedCrosshairHUD extends AbstractHUD {
     private static final TargetedCrosshairSettings SETTINGS = Main.settings.targetedCrosshairSettings;
     private static final GeneralSettings.HUDSettings HUD_SETTINGS = Main.settings.generalSettings.hudSettings;
 
-    private static final Identifier ENTITY_ICON_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/targeted_icon_entity.png");
+    private static final ResourceLocation ENTITY_ICON_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/targeted_icon_entity.png");
 
     // left padding + texture + right padding
     private static final int ICON_WIDTH = 3 + 16 + 3;
@@ -181,7 +181,7 @@ public class TargetedCrosshairHUD extends AbstractHUD {
     }
 
     @Override
-    public boolean renderHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
         if (hitResultType == null)
             return false;
         return switch (hitResultType) {
@@ -191,7 +191,7 @@ public class TargetedCrosshairHUD extends AbstractHUD {
         };
     }
 
-    public boolean renderBlockInfoHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderBlockInfoHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
 
         if (displayMode == null || cachedBlockName == null || cachedBlockModName == null || blockStack == null)
             return false;
@@ -206,7 +206,7 @@ public class TargetedCrosshairHUD extends AbstractHUD {
             case ICON -> {
                 if (drawBackground)
                     RenderUtils.fillRounded(context, x, y, x + ICON_WIDTH, y + ICON_HEIGHT, 0x80000000);
-                context.item(blockStack, x + 3, y + 3);
+                context.renderItem(blockStack, x + 3, y + 3);
             }
             case INFO -> {
                 if (drawBackground)
@@ -248,7 +248,7 @@ public class TargetedCrosshairHUD extends AbstractHUD {
                     }
                 }
 
-                context.item(blockStack, x + 3, y + 3);
+                context.renderItem(blockStack, x + 3, y + 3);
                 switch (informationMode) {
                     case TARGETED_NAME -> RenderUtils.drawTextHUD(context, cachedBlockName, x + ICON_WIDTH + gap + padding, y + 7, targetedNameColor, drawTextShadow);
                     case MOD_NAME -> RenderUtils.drawTextHUD(context, cachedBlockModName, x + ICON_WIDTH + gap + padding, y + 7, modNameColor, drawTextShadow);
@@ -263,7 +263,7 @@ public class TargetedCrosshairHUD extends AbstractHUD {
         return true;
     }
 
-    public boolean renderEntityInfoHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderEntityInfoHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
 
         if (displayMode == null || cachedEntityName == null || cachedEntityModName == null)
             return false;

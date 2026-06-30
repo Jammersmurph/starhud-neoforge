@@ -23,7 +23,7 @@ import fin.starhud.hud.implementation.hand.RightHandHUD;
 import fin.starhud.hud.implementation.other.*;
 import fin.starhud.hud.implementation.statuseffect.NegativeEffectHUD;
 import fin.starhud.hud.implementation.statuseffect.PositiveEffectHUD;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -33,20 +33,16 @@ import java.util.Map;
 
 public class HUDComponent {
 
-    // singleton
     private static HUDComponent instance;
 
     private static final Logger LOGGER = Main.LOGGER;
     private GeneralSettings.HUDSettings HUD_SETTINGS;
 
-    // Registered HUDs by ID
     private final Map<String, AbstractHUD> hudMap = new HashMap<>();
 
-    // Active HUDs (selected in config)
     private final Map<String, AbstractHUD> individualHUDs = new HashMap<>();
     private final Map<String, GroupedHUD> groupedHUDs = new HashMap<>();
 
-    // rendered HUD
     public final List<AbstractHUD> renderedHUDs = new ArrayList<>();
 
     private HUDComponent() {}
@@ -176,7 +172,7 @@ public class HUDComponent {
 
     private final List<AbstractHUD> invalidHUDs = new ArrayList<>();
 
-    public void renderAll(GuiGraphicsExtractor context) {
+    public void renderAll(GuiGraphics context) {
         PixelPlacement.start(context);
 
         for (AbstractHUD hud : renderedHUDs) {
@@ -230,7 +226,6 @@ public class HUDComponent {
         }
     }
 
-    // follow up with the updated config.
     public void updateActiveHUDs() {
         loadActiveHUDsFromConfig();
     }
@@ -249,16 +244,12 @@ public class HUDComponent {
         return cnt;
     }
 
-    // grouping function, experimental, may crash.
-
-    // hud in huds MUST be ungrouped. not doing so will crash.
     public GroupedHUDSettings group(List<AbstractHUD> huds) {
         GroupedHUDSettings newSettings = new GroupedHUDSettings();
 
         List<GroupedHUDSettings> groupedHUDs = Main.settings.hudList.groupedHuds;
         List<String> individualHUDs = Main.settings.hudList.individualHudIds;
 
-        // remove hud from individualHUDs, and add hud to the group via settings.
         for (AbstractHUD hud : huds) {
             if (hud.isInGroup()) {
                 throw new IllegalStateException("HUD " + hud.getId() + " is already in a group.");
@@ -268,11 +259,8 @@ public class HUDComponent {
                 individualHUDs.remove(hud.getId());
             newSettings.hudIds.add(hud.getId());
             hud.setGroupId(newSettings.id);
-
-//            LOGGER.info("{} added to {}", hud.getName(), newSettings.id);
         }
 
-        // we should copy the settings from the first selected hud. so that the position doesn't reset to 0,0.
         AbstractHUD firstHUD = huds.getFirst();
         newSettings.base.copyFrom(firstHUD.getSettings());
         newSettings.base.drawBackground = false;
@@ -295,7 +283,6 @@ public class HUDComponent {
             if (!(hud instanceof GroupedHUD))
                 individualHUDs.add(hud.getId());
             hud.setGroupId(null);
-//            LOGGER.info("{} removed from {}", hud.getName(), groupedHUD.groupSettings.id);
         }
 
         groupedHUDs.removeIf(a -> a.id.equals(groupedHUD.groupSettings.id));

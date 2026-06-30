@@ -4,7 +4,7 @@ import fin.starhud.config.BaseHUDSettings;
 import fin.starhud.config.ConditionalSettings;
 import fin.starhud.helper.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphics;
 
 public abstract class AbstractHUD implements HUDInterface {
 
@@ -36,7 +36,6 @@ public abstract class AbstractHUD implements HUDInterface {
         return getSettings().shouldRender();
     }
 
-    // we update every HUD's x and y points here.
     @Override
     public void update() {
         baseX = getSettings().getCalculatedPosX();
@@ -48,16 +47,15 @@ public abstract class AbstractHUD implements HUDInterface {
     }
 
     @Override
-    public boolean render(GuiGraphicsExtractor context) {
+    public boolean render(GuiGraphics context) {
         if (!isScaled())
             return renderHUD(context, getX(), getY(), shouldDrawBackground(), shouldDrawTextShadow());
 
-        // this is so we can change the scale for one hud but not the others.
-        context.pose().pushMatrix();
+        context.pose().pushPose();
         scaleHUD(context);
 
         boolean result = renderHUD(context, getX(), getY(), shouldDrawBackground(), shouldDrawTextShadow());
-        context.pose().popMatrix();
+        context.pose().popPose();
 
         return result;
     }
@@ -73,25 +71,17 @@ public abstract class AbstractHUD implements HUDInterface {
         return true;
     }
 
-    // collect what is needed for the hud to render.
-    // the true purpose of collectHUDInformation is to collect the width and height during data collection,
-    // this is to ensure that the width and height can be used before the rendering
-    // returns false if the HUD cannot be rendered
-    // returns true if the HUD is ready to be rendered.
     public abstract boolean collectHUDInformation();
 
-    // this is where the hud is rendered. Where we put the rendering logic.
-    // it is highly discouraged to put information collecting in this function.
-    // for information collecting please refer to collectHUDInformation()
-    public abstract boolean renderHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow);
+    public abstract boolean renderHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow);
 
     public abstract String getName();
 
-    public void scaleHUD(GuiGraphicsExtractor context) {
+    public void scaleHUD(GuiGraphics context) {
         float scaleFactor = getScale();
-        context.pose().translate(getX(), getY());
-        context.pose().scale(scaleFactor, scaleFactor);
-        context.pose().translate(-getX(), -getY());
+        context.pose().translate(getX(), getY(), 0);
+        context.pose().scale(scaleFactor, scaleFactor, 1.0f);
+        context.pose().translate(-getX(), -getY(), 0);
     }
 
     public void updatePos() {
@@ -102,7 +92,7 @@ public abstract class AbstractHUD implements HUDInterface {
     public void modifyXY() {
         int xOffset = 0, yOffset = 0;
 
-        float guiScale = Minecraft.getInstance().getWindow().getGuiScale();
+        float guiScale = (float) Minecraft.getInstance().getWindow().getGuiScale();
         for (ConditionalSettings condition : baseHUDSettings.getConditions()) {
             if (condition.renderMode != ConditionalSettings.RenderMode.HIDE && condition.isConditionMet()) {
                 xOffset += condition.getXOffset(guiScale);
@@ -149,9 +139,6 @@ public abstract class AbstractHUD implements HUDInterface {
     public boolean shouldDrawTextShadow() {
         return getSettings().drawTextShadow;
     }
-
-    // bounding box attribute will return 0 if HUD is not rendered once.
-    // the HUD must be rendered at least once to update the bounding box.
 
     public void setWidthHeight(int width, int height) {
         this.boundingBox.setWidthHeight(width, height);
@@ -277,7 +264,7 @@ public abstract class AbstractHUD implements HUDInterface {
     }
 
     public boolean isHovered(double mouseX, double mouseY) {
-        final float scale = Minecraft.getInstance().getWindow().getGuiScale();
+        final double scale = Minecraft.getInstance().getWindow().getGuiScale();
 
         mouseX = (int) (mouseX * scale);
         mouseY = (int) (mouseY * scale);
@@ -293,7 +280,7 @@ public abstract class AbstractHUD implements HUDInterface {
     }
 
     public boolean intersects(int x1, int y1, int x2, int y2) {
-        final float scale = Minecraft.getInstance().getWindow().getGuiScale();
+        final double scale = Minecraft.getInstance().getWindow().getGuiScale();
 
         x1 = (int) (x1 * scale);
         y1 = (int) (y1 * scale);
@@ -311,7 +298,6 @@ public abstract class AbstractHUD implements HUDInterface {
                 hudTop    <= Math.max(y1, y2);
     }
 
-    // dont go out of bounds please
     public boolean clampPos() {
         int windowWidth = Minecraft.getInstance().getWindow().getWidth();
         int windowHeight = Minecraft.getInstance().getWindow().getHeight();

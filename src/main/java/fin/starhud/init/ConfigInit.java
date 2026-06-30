@@ -15,7 +15,6 @@ public class ConfigInit {
         ConfigHolder<Settings> holder = AutoConfig.getConfigHolder(Settings.class);
         Main.settings = holder.getConfig();
 
-        // onConfigSaved we update every HUDs
         holder.registerSaveListener(ConfigInit::onConfigSaved);
     }
 

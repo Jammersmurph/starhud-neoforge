@@ -7,16 +7,16 @@ import fin.starhud.helper.RenderUtils;
 import fin.starhud.hud.AbstractHUD;
 import fin.starhud.hud.HUDId;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.resources.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 
 public class DirectionHUD extends AbstractHUD {
 
     private static final DirectionSettings DIRECTION_SETTINGS = Main.settings.directionSettings;
 
-    private static final Identifier DIRECTION_CARDINAL_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/direction.png");
-    private static final Identifier DIRECTION_ORDINAL_TEXTURE = Identifier.fromNamespaceAndPath("starhud", "hud/direction_ordinal.png");
+    private static final ResourceLocation DIRECTION_CARDINAL_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/direction.png");
+    private static final ResourceLocation DIRECTION_ORDINAL_TEXTURE = ResourceLocation.fromNamespaceAndPath("starhud", "hud/direction_ordinal.png");
 
     private static final int ORDINAL_TEXTURE_WIDTH = 19;
     private static final int ORDINAL_TEXTURE_HEIGHT = 104;
@@ -88,7 +88,7 @@ public class DirectionHUD extends AbstractHUD {
     }
 
     @Override
-    public boolean renderHUD(GuiGraphicsExtractor context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
+    public boolean renderHUD(GuiGraphics context, int x, int y, boolean drawBackground, boolean drawTextShadow) {
 
         int w = getWidth();
         int h = getHeight();
